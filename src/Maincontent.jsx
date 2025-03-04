@@ -1,36 +1,32 @@
-import { useState } from "react";
-import Sidebar from "./Sidebar";
+import { useEffect } from "react";
 
-export default function Maincontent(props){
+export default function Maincontent(props) {
 
-    function SaveNote(){
-        if (document.getElementById("title-input") !== "" && document.getElementById("text-input") !== ""){
-            let newNote ={}
+    useEffect(() => {
+        document.getElementById("title-input").value = props.selectedNote.title;
+        document.getElementById("text-input").value = props.selectedNote.text;
+    }, [props.selectedNote]);
 
-            newNote.title = document.getElementById("title-input").value
-            newNote.text = document.getElementById("text-input").value
+    function SaveNote() {
+        let titleInput = document.getElementById("title-input").value;
+        let textInput = document.getElementById("text-input").value;
 
-            props.setNoteList((n) => [...n, newNote])
-            let newList = JSON.parse(localStorage.getItem("Notes"))
-            newList.push(newNote)
+            let newList = JSON.parse(localStorage.getItem("Notes"));
 
-            localStorage.setItem("Notes", JSON.stringify(newList))
 
-            document.getElementById("title-input").value = ""
-            document.getElementById("text-input").value = ""
-        }
+            if (props.selectedNote.id !== undefined) {
+                newList[props.selectedNote.id] = { title: titleInput, text: textInput };
+                props.setNoteList(newList);
+                localStorage.setItem("Notes", JSON.stringify(newList));
+            }
     }
 
-
-
-
-    return(
+    return (
         <>
-        <h1>Title</h1>
-        <input type="text" id="title-input" /> <br /> <br />
-        <h2>Text</h2>
-        <input type="text" id="text-input" /> <br /> <br />
-        <button onClick={() => SaveNote()}>Save Note</button>
+            <h1>Title</h1>
+            <input type="text" id="title-input" onChange={SaveNote} /> <br /><br />
+            <h2>Text</h2>
+            <input type="text" id="text-input"  onChange={SaveNote} /> <br /><br />
         </>
-    )
+    );
 }

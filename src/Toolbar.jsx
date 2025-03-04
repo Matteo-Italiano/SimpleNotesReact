@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function Toolbar(){
+export default function Toolbar(props){
 
     function createNote(){
-        JSON.parse(localStorage.getItem("Notes"))
-
-        
+        let LocalStorageNotes = JSON.parse(localStorage.getItem("Notes"));
+        LocalStorageNotes.push({"title":"", "text":""});
+        localStorage.setItem("Notes", JSON.stringify(LocalStorageNotes));
+        props.setNoteList(LocalStorageNotes);
     }
+    
 
     return(
         <>
-        <img src="./" alt="Profile-Pic"/>
+        <div>
+        <img src="/Logo.svg" alt="Profile-Pic"/>
         <input type="text" id="search-bar"/>
-        <button onClick={createNote}>New Note</button>
+        <button onClick={createNote}>New</button>
+        </div>
         </>
     )
     
