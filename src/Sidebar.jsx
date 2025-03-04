@@ -22,7 +22,7 @@ export default function Sidebar(props) {
 
     return (
         <>
-            <Toolbar setNoteList={props.setNoteList} />
+            <Toolbar  setSelectedNote={props.setSelectedNote} selectedNote={props.selectedNote} setNoteList={props.setNoteList} />
             {props.notesList.map((note, index) => (
                 <Note deleteNote={deleteNote} key={index} id={index} title={note.title} text={note.text} setSelectedNote={props.setSelectedNote} selectedNote={props.selectedNote} />
             ))}

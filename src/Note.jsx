@@ -19,6 +19,7 @@ export default function Note(props) {
     }
 
     return (
+        <>
         <div style={{backgroundColor: Selector()}} onClick={() =>{
             
             if (props.selectedNote.id === props.id){
@@ -30,7 +31,9 @@ export default function Note(props) {
             <h2>Note: {props.id + 1}</h2>
             <p>Title: {props.title}</p>
             <p>Text: {props.text}</p>
-            <img src="/bin1.svg" alt="Löschen" onClick={() => props.deleteNote(props.id)} />
         </div>
+        <img src="/bin1.svg" alt="Löschen" onClick={() => props.deleteNote(props.id)} />
+        </>
+        
     );
 }

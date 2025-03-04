@@ -3,8 +3,13 @@ import { useEffect } from "react";
 export default function Maincontent(props) {
 
     useEffect(() => {
-        document.getElementById("title-input").value = props.selectedNote.title;
-        document.getElementById("text-input").value = props.selectedNote.text;
+        if (props.selectedNote.id == undefined){
+            document.getElementById("title-input").value = ""
+            document.getElementById("text-input").value = ""
+        } else {
+            document.getElementById("title-input").value = props.selectedNote.title
+            document.getElementById("text-input").value = props.selectedNote.text;
+        }
     }, [props.selectedNote]);
 
     function SaveNote() {
