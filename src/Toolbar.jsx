@@ -13,10 +13,7 @@ export default function Toolbar(props){
     }
 
 
-    function SelectCreatedNote(){
-        props.setSelectedNote({id: LocalStorageNotes.length, title: "", text: ""})
 
-    }
 
     return(
         <>
@@ -25,7 +22,6 @@ export default function Toolbar(props){
         <input type="text" id="search-bar"/>
         <button onClick={createNote}>New</button>
         </div>
-        </>
     )
     
 }
