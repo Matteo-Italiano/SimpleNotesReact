@@ -4,23 +4,29 @@ export default function Toolbar(props){
     let LocalStorageNotes = JSON.parse(localStorage.getItem("Notes"));
 
     function createNote(){
-        let LocalStorageNotes = JSON.parse(localStorage.getItem("Notes"));
-        LocalStorageNotes.push({"title":"", "text":""});
+        LocalStorageNotes.unshift({"title":"", "text":"", "date": (props.getCurrentDate()).toString()});
         localStorage.setItem("Notes", JSON.stringify(LocalStorageNotes));
-        props.setNoteList(LocalStorageNotes);
-
-        SelectCreatedNote()
+        props.setNotesList(LocalStorageNotes);
+        props.setSelectedNote({id: 0, title: "", text: "", date: (props.getCurrentDate()).toString()})
     }
 
+    function filter(e) {
+        const filteredNotes = props.notesList.map(note => ({ ...note, status: !(note.title.includes(e.target.value) || note.text.includes(e.target.value)) } ));
+    
+        props.setNotesList(filteredNotes);
+    }
+    
 
 
 
     return(
-        <>
-        <div>
+        <div className="tool-bar">
         <img src="/Logo.svg" alt="Profile-Pic"/>
-        <input type="text" id="search-bar"/>
-        <button onClick={createNote}>New</button>
+        <div className="search-div">
+            <img src="/Frame.svg" alt="Search" id="search-btn"/>
+        <input type="text" id="search-bar" placeholder="Search" onChange={(e) => filter(e)}/>
+        </div> 
+        <img src="/n-edit 1.svg" alt="Create Note" onClick={() => createNote()}/>
         </div>
     )
     
