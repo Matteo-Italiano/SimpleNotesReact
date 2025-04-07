@@ -9,20 +9,22 @@ export default function Toolbar(props){
         const NotesCollectionRef = collection(db, "Notes")
 
     function createNote(){
-        LocalStorageNotes.unshift({"title":"", "text":"", "date": (props.getCurrentDate()).toString()});
+
 
         const onCreate = async () => {
             try{
-                await addDoc(NotesCollectionRef, {"title":"", "text":"", "date": (props.getCurrentDate()).toString()})
+                let id = (await addDoc(NotesCollectionRef, {"title":"", "text":"", "date": (props.getCurrentDate()).toString()})).id
+                LocalStorageNotes.unshift({"title":"", "text":"", "date": (props.getCurrentDate()).toString(), "id": id});
+
+                localStorage.setItem("Notes", JSON.stringify(LocalStorageNotes));
+                props.setNotesList(LocalStorageNotes);
+                props.setSelectedNote({id: id, title: "", text: "", date: (props.getCurrentDate()).toString()})
             } catch(err){
                 console.error(err)
             } 
         }
-        onCreate()
 
-        localStorage.setItem("Notes", JSON.stringify(LocalStorageNotes));
-        props.setNotesList(LocalStorageNotes);
-        props.setSelectedNote({id: 0, title: "", text: "", date: (props.getCurrentDate()).toString()})
+        onCreate()
     }
 
     function filter(e) {
