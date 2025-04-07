@@ -3,7 +3,7 @@ import { db } from "./config/firebase.js";
 import { getDocs, getDoc, collection, addDoc } from "firebase/firestore";
 
 export default function Toolbar(props) {
-    let LocalStorageNotes = JSON.parse(localStorage.getItem("Notes"));
+    let noteList = props.noteList;
 
     // Referenz zu Notes Collection
     const NotesCollectionRef = collection(db, "Notes");
@@ -22,11 +22,9 @@ export default function Toolbar(props) {
                 let id = (await addDoc(NotesCollectionRef, placeholderObject)).id;
                 let ObjectWithId = { ...placeholderObject, id: id }
 
-                LocalStorageNotes.unshift(ObjectWithId);
+                noteList.unshift(ObjectWithId);
                 props.setSelectedNote(ObjectWithId);
-
-                props.setNotesList(LocalStorageNotes);
-                localStorage.setItem("Notes", JSON.stringify(LocalStorageNotes));
+                props.setNotesList(noteList);
             } catch (err) {
                 console.error(err);
             }

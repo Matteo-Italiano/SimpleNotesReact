@@ -4,12 +4,11 @@ import {doc, deleteDoc, updateDoc} from "firebase/firestore";
 
 export default function Maincontent(props) {
     const NoteRef = doc(db, "Notes", `${props.selectedNote.id}`)
-    const LOCALSTORAGE = JSON.parse(localStorage.getItem("Notes"))
+    const LOCALSTORAGE = props.notesList
     let selectedNoteIndex = LOCALSTORAGE.findIndex((Note) => Note.id === props.selectedNote.id);
 
 
     useEffect(() => {
-        
         if (!props.selectedNote.id) {
             document.getElementById("title-input").value = "";
             document.getElementById("text-input").value = "";
@@ -37,7 +36,6 @@ export default function Maincontent(props) {
             };
 
             updateNote()
-            localStorage.setItem("Notes", JSON.stringify(LOCALSTORAGE));
         }
     }
 
@@ -45,7 +43,6 @@ export default function Maincontent(props) {
         if (!props.selectedNote.id) {
         } else {
             LOCALSTORAGE.splice(selectedNoteIndex, 1);
-            localStorage.setItem("Notes", JSON.stringify(LOCALSTORAGE));
             props.setNotesList(LOCALSTORAGE);
             props.setSelectedNote({ id: undefined });
 

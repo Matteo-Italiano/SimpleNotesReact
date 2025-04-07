@@ -26,7 +26,7 @@ export default function Sidebar(props) {
             }
         }
         getData()
-    }, []);
+    }, [props.notesList]);
 
     return (
         <div id="side-bar" className="side-bar">
