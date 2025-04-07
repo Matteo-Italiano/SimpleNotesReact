@@ -1,27 +1,23 @@
 import { useEffect } from "react";
 import { db } from "./config/firebase.js";
-import { getDocs, getDoc, collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import { getDocs, getDoc, collection, addDoc, updateDoc, doc, deleteDoc } from "firebase/firestore";
+import Note from "./Note.jsx";
 
 export default function Maincontent(props) {
-    // Referenz zu Notes Collection
-    const NotesCollectionRef = collection(db, "Notes");
+    const NoteRef = doc(db, "Notes", `${props.selectedNote.id}`)
 
     useEffect(() => {
         if (props.selectedNote.id == undefined) {
             document.getElementById("title-input").value = "";
             document.getElementById("text-input").value = "";
         } else {
-            document.getElementById("title-input").innerText =
-                props.selectedNote.title;
+            document.getElementById("title-input").innerText = props.selectedNote.title;
             document.getElementById("text-input").innerText = props.selectedNote.text;
-            document.getElementById("display-date").innerText =
-                props.selectedNote.date;
+            document.getElementById("display-date").innerText = props.selectedNote.date;
         }
     }, [props.selectedNote]);
 
     function SaveNote() {
-        // TODO Diese Fuktion soll die Daten in Firebase updaten
-
         let titleInput = document.getElementById("title-input").innerText;
         let textInput = document.getElementById("text-input").innerText;
         let newList = JSON.parse(localStorage.getItem("Notes"));
@@ -33,32 +29,32 @@ export default function Maincontent(props) {
             props.setNotesList(newList);
 
             const updateNote = async () => {
-                const NoteRef = doc(db, "Notes", `${props.selectedNote.id}`)
-
                 try {
                     await updateDoc(NoteRef, {"title": titleInput, "text": textInput});
                 } catch (err) {
                     console.error(err);
                 }
             };
-            
-            updateNote()
 
+            updateNote()
             localStorage.setItem("Notes", JSON.stringify(newList));
         }
     }
 
-    function deleteNote(id) {
-        if (id == undefined) {
+    function deleteNote() {
+        if (props.selectedNote.id == undefined) {
         } else {
             let arrayToSplice = JSON.parse(localStorage.getItem("Notes"));
-            arrayToSplice.splice(id, 1);
+            arrayToSplice.splice(arrayToSplice.findIndex((Note) => Note.id === props.selectedNote.id), 1);
             localStorage.setItem("Notes", JSON.stringify(arrayToSplice));
             props.setNotesList(arrayToSplice);
+            props.setSelectedNote({ id: undefined });
 
-            if (props.selectedNote.id === id) {
-                props.setSelectedNote({ id: undefined });
+            const deleteNote = async () =>{
+                await deleteDoc(NoteRef)
             }
+            deleteNote()
+            
         }
     }
 
@@ -67,7 +63,7 @@ export default function Maincontent(props) {
             <img
                 src="/bin1.svg"
                 alt="Delete"
-                onClick={() => deleteNote(props.selectedNote.id)}
+                onClick={() => deleteNote()}
             />
             <div className="A4-Blatt">
                 <h1

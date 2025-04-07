@@ -5,8 +5,6 @@ import Note from "./Note";
 export default function Sidebar(props) {
 
     useEffect(() => {
-        // TODO: DIese Fuktion soll die Daten von Firebase bekommen.
-
         const storedNotes = JSON.parse(localStorage.getItem("Notes"));
         props.setNotesList(storedNotes);
     }, []);
