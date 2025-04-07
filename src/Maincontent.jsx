@@ -1,6 +1,11 @@
 import { useEffect } from "react";
+import { db } from "./config/firebase.js"
+import { getDocs, getDoc, collection, addDoc } from "firebase/firestore"
 
 export default function Maincontent(props) {
+
+    // Referenz zu Notes Collection
+    const NotesCollectionRef = collection(db, "Notes")
 
     useEffect(() => {
         if (props.selectedNote.id == undefined){
@@ -14,6 +19,8 @@ export default function Maincontent(props) {
     }, [props.selectedNote]);
 
     function SaveNote() {
+        // TODO Diese Fuktion soll die Daten in Firebase updaten
+
         let titleInput = document.getElementById("title-input").innerText;
         let textInput = document.getElementById("text-input").innerText;
         let newList = JSON.parse(localStorage.getItem("Notes"));

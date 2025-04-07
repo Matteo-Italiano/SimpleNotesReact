@@ -5,6 +5,10 @@ import './App.css'
 
 function App() {
 
+  const [notesList, setNotesList] = useState([])
+  const [selectedNote, setSelectedNote] = useState({})
+  const [showingNotes, setShowingNotes] = useState()
+
   function getCurrentDate(){
     let date = new Date
     const Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
@@ -12,12 +16,7 @@ function App() {
         return(finalDate)
     }
 
-  const [notesList, setNotesList] = useState([])
-  const [selectedNote, setSelectedNote] = useState({})
-  const [showingNotes, setShowingNotes] = useState()
-
     var AnimationState = "Closed";
-
     function toggleSidebar() {
         var sidebar = document.getElementById("side-bar");
         var image = document.getElementById("rotate");

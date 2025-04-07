@@ -1,10 +1,25 @@
 import { useState, useEffect } from "react";
+import { db } from "./config/firebase.js"
+import { getDocs, getDoc, collection, addDoc } from "firebase/firestore"
 
 export default function Toolbar(props){
     let LocalStorageNotes = JSON.parse(localStorage.getItem("Notes"));
 
+    // Referenz zu Notes Collection
+        const NotesCollectionRef = collection(db, "Notes")
+
     function createNote(){
         LocalStorageNotes.unshift({"title":"", "text":"", "date": (props.getCurrentDate()).toString()});
+
+        const onCreate = async () => {
+            try{
+                await addDoc(NotesCollectionRef, {"title":"", "text":"", "date": (props.getCurrentDate()).toString()})
+            } catch(err){
+                console.error(err)
+            } 
+        }
+        onCreate()
+
         localStorage.setItem("Notes", JSON.stringify(LocalStorageNotes));
         props.setNotesList(LocalStorageNotes);
         props.setSelectedNote({id: 0, title: "", text: "", date: (props.getCurrentDate()).toString()})
