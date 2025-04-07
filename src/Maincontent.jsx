@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 import { db } from "./config/firebase.js";
-import { getDocs, getDoc, collection, addDoc, updateDoc, doc, deleteDoc } from "firebase/firestore";
-import Note from "./Note.jsx";
+import {doc, deleteDoc, updateDoc} from "firebase/firestore";
 
 export default function Maincontent(props) {
     const NoteRef = doc(db, "Notes", `${props.selectedNote.id}`)
+    const LOCALSTORAGE = JSON.parse(localStorage.getItem("Notes"))
+    let selectedNoteIndex = LOCALSTORAGE.findIndex((Note) => Note.id === props.selectedNote.id);
+
 
     useEffect(() => {
-        if (props.selectedNote.id == undefined) {
+        
+        if (!props.selectedNote.id) {
             document.getElementById("title-input").value = "";
             document.getElementById("text-input").value = "";
         } else {
@@ -20,13 +23,10 @@ export default function Maincontent(props) {
     function SaveNote() {
         let titleInput = document.getElementById("title-input").innerText;
         let textInput = document.getElementById("text-input").innerText;
-        let newList = JSON.parse(localStorage.getItem("Notes"));
 
-        if (props.selectedNote.id !== undefined) {
-            let selectedNoteIndex = newList.findIndex((Note) => Note.id === props.selectedNote.id);
-
-            newList[selectedNoteIndex] = {title: titleInput, text: textInput, date: newList[selectedNoteIndex].date.toString(), id: newList[selectedNoteIndex].id};
-            props.setNotesList(newList);
+        if (props.selectedNote.id) {
+            LOCALSTORAGE[selectedNoteIndex] = {title: titleInput, text: textInput, date: LOCALSTORAGE[selectedNoteIndex].date, id: LOCALSTORAGE[selectedNoteIndex].id};
+            props.setNotesList(LOCALSTORAGE);
 
             const updateNote = async () => {
                 try {
@@ -37,17 +37,16 @@ export default function Maincontent(props) {
             };
 
             updateNote()
-            localStorage.setItem("Notes", JSON.stringify(newList));
+            localStorage.setItem("Notes", JSON.stringify(LOCALSTORAGE));
         }
     }
 
     function deleteNote() {
-        if (props.selectedNote.id == undefined) {
+        if (!props.selectedNote.id) {
         } else {
-            let arrayToSplice = JSON.parse(localStorage.getItem("Notes"));
-            arrayToSplice.splice(arrayToSplice.findIndex((Note) => Note.id === props.selectedNote.id), 1);
-            localStorage.setItem("Notes", JSON.stringify(arrayToSplice));
-            props.setNotesList(arrayToSplice);
+            LOCALSTORAGE.splice(selectedNoteIndex, 1);
+            localStorage.setItem("Notes", JSON.stringify(LOCALSTORAGE));
+            props.setNotesList(LOCALSTORAGE);
             props.setSelectedNote({ id: undefined });
 
             const deleteNote = async () =>{
