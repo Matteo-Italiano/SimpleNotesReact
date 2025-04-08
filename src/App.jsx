@@ -8,7 +8,6 @@ import './App.css'
 function App() {
   const [notesList, setNotesList] = useState([])
   const [selectedNote, setSelectedNote] = useState({})
-  const [showingNotes, setShowingNotes] = useState()
 
   const NoteRef = doc(db, "Notes", `${selectedNote.id}`)
   const NotesCollectionRef = collection(db, "Notes");
