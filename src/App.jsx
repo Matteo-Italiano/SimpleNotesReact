@@ -1,15 +1,24 @@
 import { use, useEffect, useState } from 'react'
-import { getDocs, getDoc, collection } from 'firebase/firestore'
+import { getDocs, getDoc, addDoc, collection, doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from './config/firebase.js'
 import Sidebar from './Sidebar'
 import Maincontent from './Maincontent'
 import './App.css'
 
 function App() {
+  const [notesList, setNotesList] = useState([])
+  const [selectedNote, setSelectedNote] = useState({})
+  const [showingNotes, setShowingNotes] = useState()
 
+  const NoteRef = doc(db, "Notes", `${selectedNote.id}`)
+  const NotesCollectionRef = collection(db, "Notes");
+  let selectedNoteIndex = notesList.findIndex((Note) => Note.id === selectedNote.id);
+
+
+  // Get the Data from Firestore
+useEffect(() => {
   const getData = async () => {
     try {
-
       let data = await getDocs(collection(db, "Notes"))
       let notes = []
 
@@ -18,18 +27,104 @@ function App() {
         note.id = Snapshot.id
         notes.push(note)
       });
-      
+
+      setNotesList(notes)
     } catch (err) {
       console.warn(err)
     }
   }
+
   getData()
+},[])
 
 
-  const [notesList, setNotesList] = useState([])
-  const [selectedNote, setSelectedNote] = useState({})
-  const [showingNotes, setShowingNotes] = useState()
+  // Save the Note
+  function SaveNote() {
+    let titleInput = document.getElementById("title-input").innerText;
+    let textInput = document.getElementById("text-input").innerText;
 
+    let newList = [...notesList]
+
+    if (selectedNote.id) {
+        newList[selectedNoteIndex] = {title: titleInput, text: textInput, date: newList[selectedNoteIndex].date, id: newList[selectedNoteIndex].id};
+        setNotesList(newList);
+
+        const updateNote = async () => {
+            try {
+                await updateDoc(NoteRef, {"title": titleInput, "text": textInput});
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        updateNote()
+    }
+}
+
+  //  Delete selected Note
+  function deleteNote() {
+    if (!selectedNote.id) {
+    } else {
+
+      const newList = [...notesList]
+        newList.splice(selectedNoteIndex, 1);
+
+        setNotesList(newList);
+        setSelectedNote({ id: undefined });
+
+        const deleteNoteFromFirebase = async () =>{
+            await deleteDoc(NoteRef)
+        }
+        deleteNoteFromFirebase()
+        
+    }
+}
+
+  // Show the note on the Main-Content
+  useEffect(() => {
+    if (!selectedNote.id) {
+        document.getElementById("title-input").value = "";
+        document.getElementById("text-input").value = "";
+    } else {
+        document.getElementById("title-input").innerText = selectedNote.title;
+        document.getElementById("text-input").innerText = selectedNote.text;
+        document.getElementById("display-date").innerText = selectedNote.date;
+    }
+}, [selectedNote]);
+
+
+  // Create a Note
+  function createNote() {
+    const date = getCurrentDate().toString();
+
+    let placeholderObject = {
+        title: "",
+        text: "",
+        date: date,
+    };
+
+    const onCreate = async () => {
+        try {
+            let id = (await addDoc(NotesCollectionRef, placeholderObject)).id;
+            let ObjectWithId = { ...placeholderObject, id: id }
+
+            setNotesList([ObjectWithId, ...notesList])
+            setSelectedNote(ObjectWithId);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    onCreate();
+}
+
+  // The Filter for the Searchbar
+  function filter(e) {
+    const filteredNotes = notesList.map((note) => ({...note, status: !(note.title.includes(e.target.value) || note.text.includes(e.target.value)),
+    }));
+
+    setNotesList(filteredNotes);
+}
 
   function getCurrentDate() {
     let date = new Date
@@ -59,11 +154,11 @@ function App() {
 
   return (
     <div className='all-content'>
-      <Sidebar showingNotes={showingNotes} setShowingNotes={setShowingNotes} getCurrentDate={getCurrentDate} selectedNote={selectedNote} setSelectedNote={setSelectedNote} notesList={notesList} setNotesList={setNotesList} />
+      <Sidebar filter={filter} createNote={createNote} setSelectedNote={setSelectedNote} selectedNote={selectedNote} notesList={notesList}/>
       <div className='vertical-line'>
         <img id='rotate' src="/Button 01.svg" alt="" onClick={() => toggleSidebar()} />
       </div>
-      <Maincontent getCurrentDate={getCurrentDate} selectedNote={selectedNote} setSelectedNote={setSelectedNote} notesList={notesList} setNotesList={setNotesList} />
+      <Maincontent SaveNote={SaveNote} deleteNote={deleteNote} selectedNote={selectedNote}/>
     </div>
   )
 }
