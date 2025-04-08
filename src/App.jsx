@@ -24,7 +24,11 @@ useEffect(() => {
       data.docs.forEach(Snapshot => {
         let note = Snapshot.data()
         note.id = Snapshot.id
-        notes.push(note)
+
+        if (note.text !== null && note.title !== null && note.date !== null) {
+          notes.push(note);
+        }
+        
       });
 
       setNotesList(notes)
