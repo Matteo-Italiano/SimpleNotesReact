@@ -1,5 +1,5 @@
-import { use, useEffect, useState } from 'react'
-import { getDocs, getDoc, addDoc, collection, doc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
+import { getDocs, addDoc, collection, doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from './config/firebase.js'
 import Sidebar from './Sidebar'
 import Maincontent from './Maincontent'
@@ -9,8 +9,8 @@ function App() {
   const [notesList, setNotesList] = useState([])
   const [selectedNote, setSelectedNote] = useState({})
 
-  const NoteRef = doc(db, "Notes", `${selectedNote.id}`)
   const NotesCollectionRef = collection(db, "Notes");
+  const NoteRef = doc(NotesCollectionRef, `${selectedNote.id}`)
   let selectedNoteIndex = notesList.findIndex((Note) => Note.id === selectedNote.id);
 
 
@@ -48,7 +48,6 @@ useEffect(() => {
   function SaveNote() {
     let titleInput = document.getElementById("title-input").innerText;
     let textInput = document.getElementById("text-input").innerText;
-
     let newList = [...notesList]
 
     if (selectedNote.id) {
@@ -71,7 +70,6 @@ useEffect(() => {
   function deleteNote() {
     if (!selectedNote.id) {
     } else {
-
       const newList = [...notesList]
         newList.splice(selectedNoteIndex, 1);
 
@@ -82,7 +80,6 @@ useEffect(() => {
             await deleteDoc(NoteRef)
         }
         deleteNoteFromFirebase()
-        
     }
 }
 
@@ -126,9 +123,8 @@ useEffect(() => {
 
   // The Filter for the Searchbar
   function filter(e) {
-    const filteredNotes = notesList.map((note) => ({...note, status: !(note.title.includes(e.target.value) || note.text.includes(e.target.value)),
+    const filteredNotes = notesList.map((note) => ({...note, status: !(note.title.toLowerCase().includes(e.target.value) || note.text.toLowerCase().includes(e.target.value)),
     }));
-
     setNotesList(filteredNotes);
 }
 
