@@ -25,12 +25,15 @@ useEffect(() => {
         let note = Snapshot.data()
         note.id = Snapshot.id
 
-        if (note.text !== null && note.title !== null && note.date !== null) {
+        if (
+          (typeof note.text === 'string' || typeof note.text === 'number') &&
+          (typeof note.title === 'string' || typeof note.title === 'number') &&
+          (typeof note.date === 'string')
+        ) {
           notes.push(note);
         }
         
       });
-
       setNotesList(notes)
     } catch (err) {
       console.warn(err)

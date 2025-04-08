@@ -1,7 +1,6 @@
-import { useState } from 'react'
-
 
 export default function Note(props) {
+
 
     return (
         <div draggable="true" className={`${props.selectedNote.id === props.id ? "selected" : "un-selected"} ${"small-note"} ${props.status ? "hidden" : ""}`}>

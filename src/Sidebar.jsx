@@ -1,8 +1,8 @@
-
 import Toolbar from "./Toolbar";
 import Note from "./Note";
 
 export default function Sidebar(props) {
+
 
     return (
         <div id="side-bar" className="side-bar">
