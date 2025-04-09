@@ -27,6 +27,7 @@ body {
 }
 
 .small-note-inside {
+    overflow: hidden;
     min-height: 100px;
 }
 

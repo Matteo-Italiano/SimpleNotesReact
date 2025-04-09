@@ -13,6 +13,22 @@ function App() {
   const NoteRef = doc(NotesCollectionRef, `${selectedNote.id}`)
   let selectedNoteIndex = notesList.findIndex((Note) => Note.id === selectedNote.id);
 
+  // Additional Functionality, when Window is Loaded Create a Note
+ // Window.addEventListener("Load", (event) => {
+ //   createNote()
+ // })
+
+
+  // Additional Functionality, when there is an Empty Note it will get Deleted
+
+
+  // Additional Functionality, you can Pin Notes to the Top
+
+
+
+  // Additional Functionality, you can Drag and Drop Notes
+
+
   // Get the Data from Firestore
 useEffect(() => {
   const getData = async () => {
@@ -91,7 +107,6 @@ useEffect(() => {
         document.getElementById("display-date").innerText = selectedNote.date;
     }
 }, [selectedNote]);
-
 
   // Create a Note
   function createNote() {
