@@ -13,7 +13,6 @@ function App() {
   const NoteRef = doc(NotesCollectionRef, `${selectedNote.id}`)
   let selectedNoteIndex = notesList.findIndex((Note) => Note.id === selectedNote.id);
 
-
   // Get the Data from Firestore
 useEffect(() => {
   const getData = async () => {
@@ -39,10 +38,8 @@ useEffect(() => {
       console.warn(err)
     }
   }
-
   getData()
 },[])
-
 
   // Save the Note
   function SaveNote() {
