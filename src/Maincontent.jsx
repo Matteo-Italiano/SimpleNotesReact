@@ -6,7 +6,7 @@ export default function Maincontent(props) {
             <img
                 src="./bin1.svg"
                 alt="Delete"
-                onClick={() => props.deleteNote()}
+                onClick={() => props.deleteNote(props.selectedNote)}
             />
             <div className="A4-Blatt">
                 <h1
@@ -14,7 +14,7 @@ export default function Maincontent(props) {
                     placeholder="Enter a title"
                     type="text"
                     id="title-input"
-                    onInput={() => props.SaveNote()}
+                    onInput={() => props.saveNote()}
                 ></h1>
                 <p id="display-date"></p>
                 <p
@@ -22,7 +22,7 @@ export default function Maincontent(props) {
                     placeholder="Enter a text"
                     type="text"
                     id="text-input"
-                    onInput={() => props.SaveNote()}
+                    onInput={() => props.saveNote()}
                 />{" "}
                 <br />
                 <br />
