@@ -4,7 +4,7 @@ export default function Maincontent(props) {
     return (
         <div className="main-content">
             <img
-                src="/bin1.svg"
+                src="./bin1.svg"
                 alt="Delete"
                 onClick={() => props.deleteNote()}
             />

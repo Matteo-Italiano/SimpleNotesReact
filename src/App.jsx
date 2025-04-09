@@ -170,7 +170,7 @@ useEffect(() => {
     <div className='all-content'>
       <Sidebar filter={filter} createNote={createNote} setSelectedNote={setSelectedNote} selectedNote={selectedNote} notesList={notesList}/>
       <div className='vertical-line'>
-        <img id='rotate' src="/Button 01.svg" alt="" onClick={() => toggleSidebar()} />
+        <img id='rotate' src="./Button 01.svg" alt="" onClick={() => toggleSidebar()} />
       </div>
       <Maincontent SaveNote={SaveNote} deleteNote={deleteNote} selectedNote={selectedNote}/>
     </div>
