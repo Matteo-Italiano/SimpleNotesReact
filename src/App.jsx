@@ -136,7 +136,7 @@ function App() {
 
   function filter(e) {
     const filteredNotes = notesList.map((note) => ({
-      ...note, status: !(note.title.toLowerCase().includes(e.target.value) || note.text.toLowerCase().includes(e.target.value)),
+      ...note, status: !(note.title.toLowerCase().includes((e.target.value).toLowerCase()) || note.text.toLowerCase().includes((e.target.value).toLowerCase())),
     }));
     setNotesList(filteredNotes);
   }
