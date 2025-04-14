@@ -234,6 +234,15 @@ p[contenteditable]:focus::before {
     animation: rotate2 2s forwards;
 }
 
+.pin{
+    width: 10px;
+}
+
+.pin-main{
+    width: 25px;
+    position: relative !important;
+
+}
 
 
 

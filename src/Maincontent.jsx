@@ -1,3 +1,4 @@
+import { doc } from "firebase/firestore";
 
 export default function Maincontent(props) {
 
@@ -8,6 +9,7 @@ export default function Maincontent(props) {
                 alt="Delete"
                 onClick={() => props.deleteNote(props.selectedNote)}
             />
+            <img src={props.selectedNote.pinned == true ? './Pin-Full.png' : './Pin-Empty.png'} className="pin-main" onClick={() => props.handlePinChange(props.selectedNote)}/>
             <div className="A4-Blatt">
                 <h1
                     contentEditable={!(props.selectedNote.id == undefined)}

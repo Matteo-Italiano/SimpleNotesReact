@@ -25,9 +25,13 @@ function App() {
         let data = await getDocs(collection(db, "Notes"))
         let notes = []
 
+        let index = 0;
+
         data.docs.forEach(snapshot => {
           let note = snapshot.data()
           note.id = snapshot.id
+          note.index = index;
+          index = index + 1;
 
           if (
             (typeof note.text === 'string' || typeof note.text === 'number') &&
@@ -45,6 +49,8 @@ function App() {
         })
 
         notes = notes.filter(note => note.text.trim() !== "" || note.title.trim() !== "")
+
+        notes.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
 
         setNotesList(notes)
       } catch (err) {
@@ -118,6 +124,7 @@ function App() {
         title: "",
         text: "",
         date: date,
+        pinned: false
       };
 
       const onCreate = async () => {
@@ -149,6 +156,24 @@ function App() {
     return finalDate;
   }
 
+  function handlePinChange(note) {
+    const newList = notesList.map((n) => {
+      if (n.id === note.id) {
+        const updatedNote = { ...n, pinned: !n.pinned };
+  
+        const ref = doc(notesCollectionRef, n.id);
+        updateDoc(ref, { pinned: updatedNote.pinned });
+  
+        return updatedNote;
+      }
+      return n;
+    });
+  
+    newList.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
+  
+    setNotesList(newList);
+  }
+
   var animationState = "Closed";
   function toggleSidebar() {
     var sidebar = document.getElementById("side-bar");
@@ -174,7 +199,7 @@ function App() {
       <div className='vertical-line'>
         <img id='rotate' src="./Button 01.svg" alt="" onClick={() => toggleSidebar()} />
       </div>
-      <Maincontent saveNote={saveNote} deleteNote={deleteNote} selectedNote={selectedNote} />
+      <Maincontent handlePinChange={handlePinChange} saveNote={saveNote} deleteNote={deleteNote} notesList={notesList} selectedNote={selectedNote} />
     </div>
   )
 }
