@@ -16,6 +16,7 @@ function App() {
     let index = notesList.findIndex((index) => index.id === indexNote.id);
     return index;
   }
+
   let selectedNoteIndex = currentIndexNote(selectedNote)
 
   useEffect(() => {
