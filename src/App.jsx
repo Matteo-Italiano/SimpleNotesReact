@@ -43,9 +43,7 @@ function App() {
 
           if (
             (typeof note.text === "string" || typeof note.text === "number") &&
-            (typeof note.title === "string" ||
-              typeof note.title === "number")
-          ) {
+            (typeof note.title === "string" ||typeof note.title === "number")) {
             notes.push(note);
           }
         });
@@ -199,7 +197,7 @@ function App() {
         return(finalDate)
       } else {
         let finalDate = `${months[rawDate.getMonth()]} ${rawDate.getDate()}, ${rawDate.getFullYear()}`;
-        
+
         return(finalDate)
       }
     }
