@@ -44,8 +44,7 @@ function App() {
           if (
             (typeof note.text === "string" || typeof note.text === "number") &&
             (typeof note.title === "string" ||
-              typeof note.title === "number") &&
-            typeof note.date === "string"
+              typeof note.title === "number")
           ) {
             notes.push(note);
           }
@@ -123,7 +122,7 @@ function App() {
     } else {
       document.getElementById("title-input").innerText = selectedNote.title;
       document.getElementById("text-input").innerText = selectedNote.text;
-      document.getElementById("display-date").innerText = selectedNote.date;
+      document.getElementById("display-date").innerText = getCurrentDate(selectedNote.date);
     }
     setPinStatus(selectedNote.pinned);
   }, [selectedNote]);
@@ -138,7 +137,7 @@ function App() {
       return;
     }
 
-    const date = getCurrentDate().toString();
+    const date = getCurrentDate()
     let placeholderObject = {
       title: "",
       text: "",
@@ -172,8 +171,7 @@ function App() {
     setNotesList(filteredNotes);
   }
 
-  function getCurrentDate() {
-    let date = new Date();
+  function getCurrentDate(rawDate) {
     const months = [
       "Jan",
       "Feb",
@@ -188,10 +186,23 @@ function App() {
       "Nov",
       "Dez",
     ];
-    let finalDate = `${
-      months[date.getMonth()]
-    } ${date.getDate()}, ${date.getFullYear()}`;
-    return finalDate;
+
+    if (rawDate == undefined){
+      let date = new Date();
+      
+      return(date);
+    } else {
+      if (rawDate.seconds){
+        let date = new Date((rawDate.seconds * 1000) + (rawDate.nanoseconds / 1000000))
+        let finalDate = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+
+        return(finalDate)
+      } else {
+        let finalDate = `${months[rawDate.getMonth()]} ${rawDate.getDate()}, ${rawDate.getFullYear()}`;
+        
+        return(finalDate)
+      }
+    }
   }
 
   function handlePinChange(note) {
@@ -240,6 +251,7 @@ function App() {
         setSelectedNote={setSelectedNote}
         selectedNote={selectedNote}
         notesList={notesList}
+        getCurrentDate={getCurrentDate}
       />
       <div className="vertical-line">
         <img

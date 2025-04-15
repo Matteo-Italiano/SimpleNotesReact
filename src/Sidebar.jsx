@@ -8,7 +8,7 @@ export default function Sidebar(props) {
             <Toolbar filter={props.filter} createNote={props.createNote}/>
             <div className="notes">
                 {props.notesList.map((note, index) => (
-            <Note pinned={note.pinned} key={index} date={props.notesList[index].date} title={note.title} text={note.text} id={props.notesList[index].id} setSelectedNote={props.setSelectedNote} selectedNote={props.selectedNote} status={note.status} />
+            <Note getCurrentDate={props.getCurrentDate} pinned={note.pinned} key={index} date={props.notesList[index].date} title={note.title} text={note.text} id={props.notesList[index].id} setSelectedNote={props.setSelectedNote} selectedNote={props.selectedNote} status={note.status} />
         ))}
             </div>
         </div>
