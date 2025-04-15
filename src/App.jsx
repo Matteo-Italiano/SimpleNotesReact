@@ -1,42 +1,51 @@
-import { useEffect, useState } from 'react'
-import { getDocs, addDoc, collection, doc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { db } from './config/firebase.js'
-import Sidebar from './Sidebar'
-import Maincontent from './Maincontent'
-import './App.css'
+import { useEffect, useState } from "react";
+import {
+  getDocs,
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "./config/firebase.js";
+import Sidebar from "./Sidebar";
+import Maincontent from "./Maincontent";
+import "./App.css";
 
 function App() {
-  const [notesList, setNotesList] = useState([])
-  const [selectedNote, setSelectedNote] = useState({})
+  const [notesList, setNotesList] = useState([]);
+  const [selectedNote, setSelectedNote] = useState({});
+  const [pinStatus, setPinStatus] = useState();
 
   const notesCollectionRef = collection(db, "Notes");
-  const noteRef = doc(notesCollectionRef, `${selectedNote.id}`)
+  const noteRef = doc(notesCollectionRef, `${selectedNote.id}`);
 
   let currentIndexNote = (indexNote) => {
     let index = notesList.findIndex((index) => index.id === indexNote.id);
     return index;
-  }
+  };
 
-  let selectedNoteIndex = currentIndexNote(selectedNote)
+  let selectedNoteIndex = currentIndexNote(selectedNote);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        let data = await getDocs(collection(db, "Notes"))
-        let notes = []
+        let data = await getDocs(collection(db, "Notes"));
+        let notes = [];
 
         let index = 0;
 
-        data.docs.forEach(snapshot => {
-          let note = snapshot.data()
-          note.id = snapshot.id
+        data.docs.forEach((snapshot) => {
+          let note = snapshot.data();
+          note.id = snapshot.id;
           note.index = index;
           index = index + 1;
 
           if (
-            (typeof note.text === 'string' || typeof note.text === 'number') &&
-            (typeof note.title === 'string' || typeof note.title === 'number') &&
-            (typeof note.date === 'string')
+            (typeof note.text === "string" || typeof note.text === "number") &&
+            (typeof note.title === "string" ||
+              typeof note.title === "number") &&
+            typeof note.date === "string"
           ) {
             notes.push(note);
           }
@@ -44,59 +53,66 @@ function App() {
 
         notes.forEach((note) => {
           if (note.text.trim() === "" && note.title.trim() === "") {
-            deleteNoteFromFirebase(note)
+            deleteNoteFromFirebase(note);
           }
-        })
+        });
 
-        notes = notes.filter(note => note.text.trim() !== "" || note.title.trim() !== "")
+        notes = notes.filter(
+          (note) => note.text.trim() !== "" || note.title.trim() !== ""
+        );
 
         notes.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
 
-        setNotesList(notes)
+        setNotesList(notes);
       } catch (err) {
-        console.warn(err)
+        console.warn(err);
       }
-    }
-    getData()
-  }, [])
+    };
+    getData();
+  }, []);
 
   const deleteNoteFromFirebase = async (deletingNote) => {
-    await deleteDoc(doc(notesCollectionRef, deletingNote.id))
-  }
+    await deleteDoc(doc(notesCollectionRef, deletingNote.id));
+  };
 
   function deleteNote(deletingNote) {
-    let deletingNoteIndex = currentIndexNote(deletingNote)
+    let deletingNoteIndex = currentIndexNote(deletingNote);
 
     if (deletingNoteIndex === -1) {
     } else {
-      const newList = [...notesList]
+      const newList = [...notesList];
       newList.splice(deletingNoteIndex, 1);
 
       setNotesList(newList);
       setSelectedNote({ id: undefined });
 
-      deleteNoteFromFirebase(deletingNote)
+      deleteNoteFromFirebase(deletingNote);
     }
   }
 
   function saveNote() {
     let titleInput = document.getElementById("title-input").innerText;
     let textInput = document.getElementById("text-input").innerText;
-    let newList = [...notesList]
+    let newList = [...notesList];
 
     if (selectedNote.id) {
-      newList[selectedNoteIndex] = { title: titleInput, text: textInput, date: newList[selectedNoteIndex].date, id: newList[selectedNoteIndex].id };
+      newList[selectedNoteIndex] = {
+        title: titleInput,
+        text: textInput,
+        date: newList[selectedNoteIndex].date,
+        id: newList[selectedNoteIndex].id,
+      };
       setNotesList(newList);
 
       const updateNote = async () => {
         try {
-          await updateDoc(noteRef, { "title": titleInput, "text": textInput });
+          await updateDoc(noteRef, { title: titleInput, text: textInput });
         } catch (err) {
           console.error(err);
         }
       };
 
-      updateNote()
+      updateNote();
     }
   }
 
@@ -109,50 +125,72 @@ function App() {
       document.getElementById("text-input").innerText = selectedNote.text;
       document.getElementById("display-date").innerText = selectedNote.date;
     }
+    setPinStatus(selectedNote.pinned);
   }, [selectedNote]);
 
   function createNote() {
-      const emptyNote = notesList.find(note => note.title.trim() === "" && note.text.trim() === "");
+    const emptyNote = notesList.find(
+      (note) => note.title.trim() === "" && note.text.trim() === ""
+    );
 
-      if (emptyNote) {
-          setSelectedNote(emptyNote);
-          return;
+    if (emptyNote) {
+      setSelectedNote(emptyNote);
+      return;
+    }
+
+    const date = getCurrentDate().toString();
+    let placeholderObject = {
+      title: "",
+      text: "",
+      date: date,
+      pinned: false,
+    };
+
+    const onCreate = async () => {
+      try {
+        let id = (await addDoc(notesCollectionRef, placeholderObject)).id;
+        let objectWithId = { ...placeholderObject, id: id };
+
+        setNotesList([objectWithId, ...notesList]);
+        setSelectedNote(objectWithId);
+      } catch (err) {
+        console.error(err);
       }
-      
-      const date = getCurrentDate().toString();
-      let placeholderObject = {
-        title: "",
-        text: "",
-        date: date,
-        pinned: false
-      };
+    };
 
-      const onCreate = async () => {
-        try {
-          let id = (await addDoc(notesCollectionRef, placeholderObject)).id;
-          let objectWithId = { ...placeholderObject, id: id }
-
-          setNotesList([objectWithId, ...notesList])
-          setSelectedNote(objectWithId);
-        } catch (err) {
-          console.error(err);
-        }
-      };
-
-      onCreate();
+    onCreate();
   }
 
   function filter(e) {
     const filteredNotes = notesList.map((note) => ({
-      ...note, status: !(note.title.toLowerCase().includes((e.target.value).toLowerCase()) || note.text.toLowerCase().includes((e.target.value).toLowerCase())),
+      ...note,
+      status: !(
+        note.title.toLowerCase().includes(e.target.value.toLowerCase()) ||
+        note.text.toLowerCase().includes(e.target.value.toLowerCase())
+      ),
     }));
     setNotesList(filteredNotes);
   }
 
   function getCurrentDate() {
-    let date = new Date()
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
-    let finalDate = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
+    let date = new Date();
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez",
+    ];
+    let finalDate = `${
+      months[date.getMonth()]
+    } ${date.getDate()}, ${date.getFullYear()}`;
     return finalDate;
   }
 
@@ -160,18 +198,19 @@ function App() {
     const newList = notesList.map((n) => {
       if (n.id === note.id) {
         const updatedNote = { ...n, pinned: !n.pinned };
-  
+
         const ref = doc(notesCollectionRef, n.id);
         updateDoc(ref, { pinned: updatedNote.pinned });
-  
+
         return updatedNote;
       }
       return n;
     });
-  
+
     newList.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
-  
+
     setNotesList(newList);
+    setPinStatus(!pinStatus);
   }
 
   var animationState = "Closed";
@@ -194,14 +233,33 @@ function App() {
   }
 
   return (
-    <div className='all-content'>
-      <Sidebar filter={filter} createNote={createNote} setSelectedNote={setSelectedNote} selectedNote={selectedNote} notesList={notesList} />
-      <div className='vertical-line'>
-        <img id='rotate' src="./Button 01.svg" alt="" onClick={() => toggleSidebar()} />
+    <div className="all-content">
+      <Sidebar
+        filter={filter}
+        createNote={createNote}
+        setSelectedNote={setSelectedNote}
+        selectedNote={selectedNote}
+        notesList={notesList}
+      />
+      <div className="vertical-line">
+        <img
+          id="rotate"
+          src="./Button 01.svg"
+          alt=""
+          onClick={() => toggleSidebar()}
+        />
       </div>
-      <Maincontent handlePinChange={handlePinChange} saveNote={saveNote} deleteNote={deleteNote} notesList={notesList} selectedNote={selectedNote} />
+      <Maincontent
+        pinStatus={pinStatus}
+        handlePinChange={handlePinChange}
+        saveNote={saveNote}
+        deleteNote={deleteNote}
+        selectedNoteIndex={selectedNoteIndex}
+        notesList={notesList}
+        selectedNote={selectedNote}
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
