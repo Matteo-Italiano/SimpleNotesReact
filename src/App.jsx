@@ -39,7 +39,7 @@ function App() {
 
           if (
             (typeof note.text === "string" || typeof note.text === "number") &&
-            (typeof note.title === "string" ||typeof note.title === "number")) {
+            (typeof note.title === "string" || typeof note.title === "number")) {
             notes.push(note);
           }
         });
@@ -57,15 +57,15 @@ function App() {
         );
 
         notes.sort((a, b) => {
-          
+
           if (b.pinned === a.pinned) {
             return b.date - a.date;
           }
           return b.pinned ? 1 : -1;
         });
-        
 
-        
+
+
         setNotesList(notes);
       } catch (err) {
         console.warn(err);
@@ -83,7 +83,7 @@ function App() {
       document.getElementById("text-input").innerText = selectedNote.text;
       document.getElementById("display-date").innerText = formatDateToString(selectedNote.date)
 
-    setPinStatus(selectedNote.pinned);
+      setPinStatus(selectedNote.pinned);
     }
   }, [selectedNote]);
 
@@ -193,20 +193,20 @@ function App() {
       "Dez",
     ];
 
-    if (rawDate == undefined){
+    if (rawDate == undefined) {
       let date = new Date();
-      
-      return(date);
+
+      return (date);
     } else {
-      if (rawDate.seconds){
+      if (rawDate.seconds) {
         let date = new Date((rawDate.seconds * 1000) + (rawDate.nanoseconds / 1000000))
         let finalDate = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
-        return(finalDate)
+        return (finalDate)
       } else {
         let finalDate = `${months[rawDate.getMonth()]} ${rawDate.getDate()}, ${rawDate.getFullYear()}`;
 
-        return(finalDate)
+        return (finalDate)
       }
     }
   }
@@ -228,7 +228,7 @@ function App() {
     ];
 
     let finalDate = `${months[dateObject.getMonth()]} ${dateObject.getDate()}, ${dateObject.getFullYear()}`;
-    return(finalDate)
+    return (finalDate)
   }
 
 
@@ -246,8 +246,13 @@ function App() {
       return n;
     });
 
-    newList.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
+    newList.sort((a, b) => {
 
+      if (b.pinned === a.pinned) {
+        return b.date - a.date;
+      }
+      return b.pinned ? 1 : -1;
+    });
     setNotesList(newList);
     setPinStatus(!pinStatus);
   }
@@ -271,7 +276,7 @@ function App() {
     }
   }
 
-  function currentIndexNote (indexNote) {
+  function currentIndexNote(indexNote) {
     let index = notesList.findIndex((index) => index.id === indexNote.id);
     return index;
   };
