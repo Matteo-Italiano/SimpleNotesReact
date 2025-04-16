@@ -21,11 +21,6 @@ function App() {
   const notesCollectionRef = collection(db, "Notes");
   const noteRef = doc(notesCollectionRef, `${selectedNote.id}`);
 
-  let currentIndexNote = (indexNote) => {
-    let index = notesList.findIndex((index) => index.id === indexNote.id);
-    return index;
-  };
-
   let selectedNoteIndex = currentIndexNote(selectedNote);
 
   useEffect(() => {
@@ -72,6 +67,20 @@ function App() {
     getData();
   }, []);
 
+  useEffect(() => {
+    if (!selectedNote.id) {
+      document.getElementById("title-input").value = "";
+      document.getElementById("text-input").value = "";
+    } else {
+      document.getElementById("title-input").innerText = selectedNote.title;
+      document.getElementById("text-input").innerText = selectedNote.text;
+      document.getElementById("display-date").innerText = formatDateToString(selectedNote.date)
+
+    setPinStatus(selectedNote.pinned);
+    }
+  }, [selectedNote]);
+
+
   const deleteNoteFromFirebase = async (deletingNote) => {
     await deleteDoc(doc(notesCollectionRef, deletingNote.id));
   };
@@ -117,19 +126,6 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    if (!selectedNote.id) {
-      document.getElementById("title-input").value = "";
-      document.getElementById("text-input").value = "";
-    } else {
-      document.getElementById("title-input").innerText = selectedNote.title;
-      document.getElementById("text-input").innerText = selectedNote.text;
-      document.getElementById("display-date").innerText = formatDateToString(selectedNote.date)
-
-    setPinStatus(selectedNote.pinned);
-    }
-  }, [selectedNote]);
-
   function createNote() {
     const emptyNote = notesList.find(
       (note) => note.title.trim() === "" && note.text.trim() === ""
@@ -163,7 +159,7 @@ function App() {
     onCreate();
   }
 
-  function filter(e) {
+  function filterNotes(e) {
     const filteredNotes = notesList.map((note) => ({
       ...note,
       status: !(
@@ -268,10 +264,16 @@ function App() {
     }
   }
 
+  let currentIndexNote = (indexNote) => {
+    let index = notesList.findIndex((index) => index.id === indexNote.id);
+    return index;
+  };
+
+
   return (
     <div className="all-content">
       <Sidebar
-        filter={filter}
+        filter={filterNotes}
         createNote={createNote}
         setSelectedNote={setSelectedNote}
         selectedNote={selectedNote}
