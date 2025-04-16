@@ -264,7 +264,7 @@ function App() {
     }
   }
 
-  let currentIndexNote = (indexNote) => {
+  function currentIndexNote (indexNote) {
     let index = notesList.findIndex((index) => index.id === indexNote.id);
     return index;
   };
