@@ -11,7 +11,7 @@ export default function Toolbar(props) {
                     type="text"
                     id="search-bar"
                     placeholder="Search"
-                    onChange={(e) => props.filter(e)}
+                    onChange={(e) => props.filterNotes(e)}
                 />
             </div>
             <img src="./n-edit 1.svg" alt="Create Note" onClick={() => props.createNote()} />

@@ -1,97 +1,78 @@
-import { useEffect, useState } from 'react'
-import { getDocs, addDoc, collection, doc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { db } from './config/firebase.js'
-import Sidebar from './Sidebar'
-import Maincontent from './Maincontent'
-import './App.css'
+import { useEffect, useState } from "react";
+import {
+  getDocs,
+  getDoc,
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "./config/firebase.js";
+import Sidebar from "./Sidebar";
+import Maincontent from "./Maincontent";
+import "./App.css";
 
 function App() {
-  const [notesList, setNotesList] = useState([])
-  const [selectedNote, setSelectedNote] = useState({})
+  const [notesList, setNotesList] = useState([]);
+  const [selectedNote, setSelectedNote] = useState({});
+  const [pinStatus, setPinStatus] = useState();
 
   const notesCollectionRef = collection(db, "Notes");
-  const noteRef = doc(notesCollectionRef, `${selectedNote.id}`)
+  const noteRef = doc(notesCollectionRef, `${selectedNote.id}`);
 
-  let currentIndexNote = (indexNote) => {
-    let index = notesList.findIndex((index) => index.id === indexNote.id);
-    return index;
-  }
-  let selectedNoteIndex = currentIndexNote(selectedNote)
+  let selectedNoteIndex = currentIndexNote(selectedNote);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        let data = await getDocs(collection(db, "Notes"))
-        let notes = []
+        let data = await getDocs(collection(db, "Notes"));
+        let notes = [];
 
-        data.docs.forEach(snapshot => {
-          let note = snapshot.data()
-          note.id = snapshot.id
+        let index = 0;
+
+        data.docs.forEach((snapshot) => {
+          let note = snapshot.data();
+          note.id = snapshot.id;
+          note.index = index;
+          index = index + 1;
 
           if (
-            (typeof note.text === 'string' || typeof note.text === 'number') &&
-            (typeof note.title === 'string' || typeof note.title === 'number') &&
-            (typeof note.date === 'string')
-          ) {
+            (typeof note.text === "string" || typeof note.text === "number") &&
+            (typeof note.title === "string" || typeof note.title === "number")) {
             notes.push(note);
           }
         });
 
         notes.forEach((note) => {
           if (note.text.trim() === "" && note.title.trim() === "") {
-            deleteNoteFromFirebase(note)
+            deleteNoteFromFirebase(note);
           }
-        })
 
-        notes = notes.filter(note => note.text.trim() !== "" || note.title.trim() !== "")
+          note.date = new Date(note.date.seconds * 1000)
+        });
 
-        setNotesList(notes)
+        notes = notes.filter(
+          (note) => note.text.trim() !== "" || note.title.trim() !== ""
+        );
+
+        notes.sort((a, b) => {
+
+          if (b.pinned === a.pinned) {
+            return b.date - a.date;
+          }
+          return b.pinned ? 1 : -1;
+        });
+
+
+
+        setNotesList(notes);
       } catch (err) {
-        console.warn(err)
+        console.warn(err);
       }
-    }
-    getData()
-  }, [])
-
-  const deleteNoteFromFirebase = async (deletingNote) => {
-    await deleteDoc(doc(notesCollectionRef, deletingNote.id))
-  }
-
-  function deleteNote(deletingNote) {
-    let deletingNoteIndex = currentIndexNote(deletingNote)
-
-    if (deletingNoteIndex === -1) {
-    } else {
-      const newList = [...notesList]
-      newList.splice(deletingNoteIndex, 1);
-
-      setNotesList(newList);
-      setSelectedNote({ id: undefined });
-
-      deleteNoteFromFirebase(deletingNote)
-    }
-  }
-
-  function saveNote() {
-    let titleInput = document.getElementById("title-input").innerText;
-    let textInput = document.getElementById("text-input").innerText;
-    let newList = [...notesList]
-
-    if (selectedNote.id) {
-      newList[selectedNoteIndex] = { title: titleInput, text: textInput, date: newList[selectedNoteIndex].date, id: newList[selectedNoteIndex].id };
-      setNotesList(newList);
-
-      const updateNote = async () => {
-        try {
-          await updateDoc(noteRef, { "title": titleInput, "text": textInput });
-        } catch (err) {
-          console.error(err);
-        }
-      };
-
-      updateNote()
-    }
-  }
+    };
+    getData();
+  }, []);
 
   useEffect(() => {
     if (!selectedNote.id) {
@@ -100,52 +81,180 @@ function App() {
     } else {
       document.getElementById("title-input").innerText = selectedNote.title;
       document.getElementById("text-input").innerText = selectedNote.text;
-      document.getElementById("display-date").innerText = selectedNote.date;
+      document.getElementById("display-date").innerText = formatDateToString(selectedNote.date)
+
+      setPinStatus(selectedNote.pinned);
     }
   }, [selectedNote]);
 
-  function createNote() {
-      const emptyNote = notesList.find(note => note.title.trim() === "" && note.text.trim() === "");
 
-      if (emptyNote) {
-          setSelectedNote(emptyNote);
-          return;
-      }
-      
-      const date = getCurrentDate().toString();
-      let placeholderObject = {
-        title: "",
-        text: "",
-        date: date,
+  const deleteNoteFromFirebase = async (deletingNote) => {
+    await deleteDoc(doc(notesCollectionRef, deletingNote.id));
+  };
+
+  function deleteNote(deletingNote) {
+    let deletingNoteIndex = currentIndexNote(deletingNote);
+
+    if (deletingNoteIndex === -1) {
+    } else {
+      const newList = [...notesList];
+      newList.splice(deletingNoteIndex, 1);
+
+      setNotesList(newList);
+      setSelectedNote({ id: undefined });
+
+      deleteNoteFromFirebase(deletingNote);
+    }
+  }
+
+  function saveNote() {
+    let titleInput = document.getElementById("title-input").innerText;
+    let textInput = document.getElementById("text-input").innerText;
+    let newList = [...notesList];
+
+    if (selectedNote.id) {
+      newList[selectedNoteIndex] = {
+        title: titleInput,
+        text: textInput,
+        date: newList[selectedNoteIndex].date,
+        id: newList[selectedNoteIndex].id,
       };
+      setNotesList(newList);
 
-      const onCreate = async () => {
+      const updateNote = async () => {
         try {
-          let id = (await addDoc(notesCollectionRef, placeholderObject)).id;
-          let objectWithId = { ...placeholderObject, id: id }
-
-          setNotesList([objectWithId, ...notesList])
-          setSelectedNote(objectWithId);
+          await updateDoc(noteRef, { title: titleInput, text: textInput });
         } catch (err) {
           console.error(err);
         }
       };
 
-      onCreate();
+      updateNote();
+    }
   }
 
-  function filter(e) {
+  function createNote() {
+    const emptyNote = notesList.find(
+      (note) => note.title.trim() === "" && note.text.trim() === ""
+    );
+
+    if (emptyNote) {
+      setSelectedNote(emptyNote);
+      return;
+    }
+
+    const date = new Date()
+    let placeholderObject = {
+      title: "",
+      text: "",
+      date: date,
+      pinned: false,
+    };
+
+    const onCreate = async () => {
+      try {
+        let id = (await addDoc(notesCollectionRef, placeholderObject)).id;
+        let objectWithId = { ...placeholderObject, id: id };
+
+        setNotesList([objectWithId, ...notesList]);
+        setSelectedNote(objectWithId);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    onCreate();
+  }
+
+  function filterNotes(e) {
     const filteredNotes = notesList.map((note) => ({
-      ...note, status: !(note.title.toLowerCase().includes((e.target.value).toLowerCase()) || note.text.toLowerCase().includes((e.target.value).toLowerCase())),
+      ...note,
+      status: !(
+        note.title.toLowerCase().includes(e.target.value.toLowerCase()) ||
+        note.text.toLowerCase().includes(e.target.value.toLowerCase())
+      ),
     }));
     setNotesList(filteredNotes);
   }
 
-  function getCurrentDate() {
-    let date = new Date()
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
-    let finalDate = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
-    return finalDate;
+  function getCurrentDate(rawDate) {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez",
+    ];
+
+    if (rawDate == undefined) {
+      let date = new Date();
+
+      return (date);
+    } else {
+      if (rawDate.seconds) {
+        let date = new Date((rawDate.seconds * 1000) + (rawDate.nanoseconds / 1000000))
+        let finalDate = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+
+        return (finalDate)
+      } else {
+        let finalDate = `${months[rawDate.getMonth()]} ${rawDate.getDate()}, ${rawDate.getFullYear()}`;
+
+        return (finalDate)
+      }
+    }
+  }
+
+  const formatDateToString = (dateObject) => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez",
+    ];
+
+    let finalDate = `${months[dateObject.getMonth()]} ${dateObject.getDate()}, ${dateObject.getFullYear()}`;
+    return (finalDate)
+  }
+
+
+
+  function handlePinChange(note) {
+    const newList = notesList.map((n) => {
+      if (n.id === note.id) {
+        const updatedNote = { ...n, pinned: !n.pinned };
+
+        const ref = doc(notesCollectionRef, n.id);
+        updateDoc(ref, { pinned: updatedNote.pinned });
+
+        return updatedNote;
+      }
+      return n;
+    });
+
+    newList.sort((a, b) => {
+
+      if (b.pinned === a.pinned) {
+        return b.date - a.date;
+      }
+      return b.pinned ? 1 : -1;
+    });
+    setNotesList(newList);
+    setPinStatus(!pinStatus);
   }
 
   var animationState = "Closed";
@@ -167,15 +276,42 @@ function App() {
     }
   }
 
+  function currentIndexNote(indexNote) {
+    let index = notesList.findIndex((index) => index.id === indexNote.id);
+    return index;
+  };
+
+
   return (
-    <div className='all-content'>
-      <Sidebar filter={filter} createNote={createNote} setSelectedNote={setSelectedNote} selectedNote={selectedNote} notesList={notesList} />
-      <div className='vertical-line'>
-        <img id='rotate' src="./Button 01.svg" alt="" onClick={() => toggleSidebar()} />
+    <div className="all-content">
+      <Sidebar
+        filter={filterNotes}
+        createNote={createNote}
+        setSelectedNote={setSelectedNote}
+        selectedNote={selectedNote}
+        notesList={notesList}
+        getCurrentDate={getCurrentDate}
+        formatDateToString={formatDateToString}
+      />
+      <div className="vertical-line">
+        <img
+          id="rotate"
+          src="./Button 01.svg"
+          alt=""
+          onClick={() => toggleSidebar()}
+        />
       </div>
-      <Maincontent saveNote={saveNote} deleteNote={deleteNote} selectedNote={selectedNote} />
+      <Maincontent
+        pinStatus={pinStatus}
+        handlePinChange={handlePinChange}
+        saveNote={saveNote}
+        deleteNote={deleteNote}
+        selectedNoteIndex={selectedNoteIndex}
+        notesList={notesList}
+        selectedNote={selectedNote}
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
