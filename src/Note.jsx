@@ -8,7 +8,7 @@ export default function Note(props) {
             <img id="small-pin" src={props.pinned ? './Pin-Full.png': './Pin-Empty.png'} alt="" className="pin"/>
             <h2 className='small-note-title'> <b>{(props.title).toString().slice(0,26)}</b></h2>
             <h4 className='small-note-text' >{(props.text).toString().slice(0,73)}</h4>
-            <p className='small-note-date'>{props.getCurrentDate(props.date)}</p>
+            <p className='small-note-date'>{props.formatDateToString(props.date)}</p>
         </div>
         </div>
     );

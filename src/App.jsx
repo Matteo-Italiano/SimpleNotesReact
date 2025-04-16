@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   getDocs,
+  getDoc,
   addDoc,
   collection,
   doc,
@@ -52,6 +53,8 @@ function App() {
           if (note.text.trim() === "" && note.title.trim() === "") {
             deleteNoteFromFirebase(note);
           }
+
+          note.date = new Date(note.date.seconds * 1000)
         });
 
         notes = notes.filter(
@@ -60,6 +63,7 @@ function App() {
 
         notes.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
 
+        
         setNotesList(notes);
       } catch (err) {
         console.warn(err);
@@ -120,9 +124,10 @@ function App() {
     } else {
       document.getElementById("title-input").innerText = selectedNote.title;
       document.getElementById("text-input").innerText = selectedNote.text;
-      document.getElementById("display-date").innerText = getCurrentDate(selectedNote.date);
-    }
+      document.getElementById("display-date").innerText = formatDateToString(selectedNote.date)
+
     setPinStatus(selectedNote.pinned);
+    }
   }, [selectedNote]);
 
   function createNote() {
@@ -135,7 +140,7 @@ function App() {
       return;
     }
 
-    const date = getCurrentDate()
+    const date = new Date()
     let placeholderObject = {
       title: "",
       text: "",
@@ -203,6 +208,28 @@ function App() {
     }
   }
 
+  const formatDateToString = (dateObject) => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez",
+    ];
+
+    let finalDate = `${months[dateObject.getMonth()]} ${dateObject.getDate()}, ${dateObject.getFullYear()}`;
+    return(finalDate)
+  }
+
+
+
   function handlePinChange(note) {
     const newList = notesList.map((n) => {
       if (n.id === note.id) {
@@ -250,6 +277,7 @@ function App() {
         selectedNote={selectedNote}
         notesList={notesList}
         getCurrentDate={getCurrentDate}
+        formatDateToString={formatDateToString}
       />
       <div className="vertical-line">
         <img
