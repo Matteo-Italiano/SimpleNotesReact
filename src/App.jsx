@@ -56,7 +56,14 @@ function App() {
           (note) => note.text.trim() !== "" || note.title.trim() !== ""
         );
 
-        notes.sort((a, b) => (b.pinned === a.pinned ? 0 : b.pinned ? 1 : -1));
+        notes.sort((a, b) => {
+          
+          if (b.pinned === a.pinned) {
+            return b.date - a.date;
+          }
+          return b.pinned ? 1 : -1;
+        });
+        
 
         
         setNotesList(notes);
